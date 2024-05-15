@@ -1,0 +1,16 @@
+import requests
+import json
+import pandas as pd
+from datetime import datetime
+import pyspark.sql.functions as F
+from pyspark.sql.types import StructType, StructField, StringType, FloatType, TimestampType
+
+# Set up Databricks API URL and token
+DATABRICKS_INSTANCE = "https://<your-databricks-instance>"
+ACCESS_TOKEN = "<your-access-token>"
+
+# Headers for API authentication
+headers = {
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "Content-Type": "application/json"
+}
