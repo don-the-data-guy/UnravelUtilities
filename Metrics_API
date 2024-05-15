@@ -14,3 +14,55 @@ headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}",
     "Content-Type": "application/json"
 }
+
+
+# Function to fetch cluster metrics
+def fetch_cluster_metrics(cluster_id):
+    metrics_url = f"{DATABRICKS_INSTANCE}/api/2.0/clusters/get?cluster_id={cluster_id}"
+    response = requests.get(metrics_url, headers=headers)
+    return response.json()
+
+# Function to extract relevant metrics
+def extract_metrics(metrics_json, app_name, stage_id, task_id):
+    metrics = []
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Example: extracting some metrics
+    metrics.append({
+        "MetricName": "Performance",
+        "MetricValue": metrics_json["metrics"]["performance"],
+        "MetricType": "Performance",
+        "timestamp": timestamp,
+        "AppName": app_name,
+        "StageID": stage_id,
+        "TaskID": task_id
+    })
+    metrics.append({
+        "MetricName": "Stability",
+        "MetricValue": metrics_json["metrics"]["stability"],
+        "MetricType": "Stability",
+        "timestamp": timestamp,
+        "AppName": app_name,
+        "StageID": stage_id,
+        "TaskID": task_id
+    })
+    # Add other metrics similarly...
+
+    return metrics
+
+# Fetch metrics for a specific cluster
+cluster_id = "<your-cluster-id>"
+app_name = "SampleApp"
+stage_id = "1"
+task_id = "1"
+
+metrics_json = fetch_cluster_metrics(cluster_id)
+metrics_data = extract_metrics(metrics_json, app_name, stage_id, task_id)
+
+
+# Convert metrics to Pandas DataFrame
+metrics_df = pd.DataFrame(metrics_data)
+
+# Create Spark DataFrame from Pandas DataFrame
+spark_df = spark.createDataFrame(metrics_df)
+
