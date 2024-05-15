@@ -1,4 +1,4 @@
-import requests
+To import requests
 import json
 import pandas as pd
 from datetime import datetime
@@ -65,4 +65,36 @@ metrics_df = pd.DataFrame(metrics_data)
 
 # Create Spark DataFrame from Pandas DataFrame
 spark_df = spark.createDataFrame(metrics_df)
+
+
+# Define schema for the Delta table
+schema = StructType([
+    StructField("MetricName", StringType(), True),
+    StructField("MetricValue", FloatType(), True),
+    StructField("MetricType", StringType(), True),
+    StructField("timestamp", TimestampType(), True),
+    StructField("AppName", StringType(), True),
+    StructField("StageID", StringType(), True),
+    StructField("TaskID", StringType(), True)
+])
+
+# Create Delta table if not exists and append data
+delta_table = "metrics_table"
+
+# Create table if it doesn't exist
+spark.sql(f"""
+CREATE TABLE IF NOT EXISTS {delta_table} (
+    MetricName STRING,
+    MetricValue FLOAT,
+    MetricType STRING,
+    timestamp TIMESTAMP,
+    AppName STRING,
+    StageID STRING,
+    TaskID STRING
+) USING DELTA
+""")
+
+# Write data to Delta table
+spark_df.write.format("delta").mode("append").saveAsTable(delta_table)
+
 
